@@ -1,0 +1,7 @@
+# Atari/PureC dev environment intermediates + binary outputs:
+*.O
+*.PDB
+*.PRG
+
+# editor scratch files
+*.bak
