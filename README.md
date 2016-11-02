@@ -47,13 +47,13 @@ Find the geocache location which is positioned on the coordinate which matches t
 
 ## TODO
 
-[ ] conversion to JavaScript so this code can run in a web page
+* conversion to JavaScript so this code can run in a web page
 
-[ ] visualize results in Google Maps
+* visualize results in Google Maps
 
-[ ] ... unit tests? 
+* ... unit tests? 
 
-[ ] ... etc.
+* ... etc.
 
 
 
