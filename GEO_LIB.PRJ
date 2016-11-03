@@ -7,8 +7,8 @@ geo_lib.prg                  ; name of executable program is topmost window
 =                  ; list of modules follows...
 
 e:\pc\lib\original\PCSTART.s          ; startup code
-
-geo_lib.c                  ; compile topmost window
+geo_xy.c (geo_lib.h)
+geo_lib.c  (geo_lib.h)                ; compile topmost window
 
 ;e:\pc\plotrout\pixel.c
 ;ia_add.lib         ; I_A shit

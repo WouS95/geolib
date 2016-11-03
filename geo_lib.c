@@ -17,10 +17,7 @@
 
 #include <stdio.h>
 #include <math.h>
-
-int xy2ne(float* n, float* e, float x, float y); /* RD to WGS84 conversion */
-int ne2xy(float *x, float *y, float n, float e); /* WGS84 to RD conversion */
-char* nddd_str(char* str, float n);
+#include "geo_lib.h"
 
 #define X0 155000.00
 #define Y0 463000.00
@@ -35,7 +32,9 @@ char* nddd_str(char* str, float n);
 #define LABDA_MIN 2.93875
 #define LABDA_MAX 7.57893
 
-int xy2ne(float* n, float* e, float x, float y)
+
+
+int xy2ne(double* n, double* e, double x, double y)
 {
   /* eerst boundary check, 
   **  -7000 <= x <= 300000
@@ -44,17 +43,17 @@ int xy2ne(float* n, float* e, float x, float y)
   ** de coordinaten worden wel berekend
   */
   int res=0;
-  float dx1;
-  float dx2;
-  float dx3;
-  float dx4;
-  float dx5;
-  float dy1;
-  float dy2;
-  float dy3;
-  float dy4;
-  float phi;
-  float labda;
+  double dx1;
+  double dx2;
+  double dx3;
+  double dx4;
+  double dx5;
+  double dy1;
+  double dy2;
+  double dy3;
+  double dy4;
+  double phi;
+  double labda;
   if((x<X_MIN) || (x>X_MAX))
   { /* x buiten geldigheids gebied */
     res+=-1;
@@ -88,7 +87,7 @@ int xy2ne(float* n, float* e, float x, float y)
   return res;
 }
 
-int ne2xy(float *x, float *y, float n, float e)
+int ne2xy(double *x, double *y, double n, double e)
 {
   /*
   ** eerst boundary check
@@ -98,15 +97,15 @@ int ne2xy(float *x, float *y, float n, float e)
   ** de coordinaten worden wel berekend
   */
   int res=0;
-  float dp1;
-  float dp2;
-  float dp3;
-  float dl1;
-  float dl2;
-  float dl3;
-  float dl4;
-  float xx;
-  float yy;
+  double dp1;
+  double dp2;
+  double dp3;
+  double dl1;
+  double dl2;
+  double dl3;
+  double dl4;
+  double xx;
+  double yy;
   if((n<PHI_MIN) || (n>PHI_MAX))
   { /* noord bound error */
     res+=-2;
@@ -137,9 +136,9 @@ int ne2xy(float *x, float *y, float n, float e)
   return res;
 }
 
-char* nddd_str(char* str, float n)
+char* nddd_str(char* str, double n)
 { /* 
-  ** float n naar Ndd.ddddd string
+  ** double n naar Ndd.ddddd string
   ** str is minstens 10 lang
   */
   if(n>=0)
@@ -155,9 +154,9 @@ char* nddd_str(char* str, float n)
   return str;
 }
 
-char* eddd_str(char* str, float e)
+char* eddd_str(char* str, double e)
 { /* 
-  ** float e naar Eddd.ddddd string
+  ** double e naar Eddd.ddddd string
   ** str is minstens 11 lang
   */
   if(e>=0)
@@ -173,9 +172,9 @@ char* eddd_str(char* str, float e)
   return str;
 }
 
-char* ddd_str(char* str, float n, float e)
+char* ddd_str(char* str, double n, double e)
 { /* 
-  ** float n, e naar Ndd.ddddd Eddd.ddddd string
+  ** double n, e naar Ndd.ddddd Eddd.ddddd string
   ** str is minstens 21 lang
   */
 	nddd_str(str, n);
@@ -184,9 +183,9 @@ char* ddd_str(char* str, float n, float e)
   return str;
 }
 
-char* ndmm_str(char* str, float n)
+char* ndmm_str(char* str, double n)
 { /* 
-  ** float n naar Ndd mm.mmm string
+  ** double n naar Ndd mm.mmm string
   ** str is minstens 11 lang
   */
   int d;
@@ -201,20 +200,22 @@ char* ndmm_str(char* str, float n)
     str[0]='S';
     n=-n;
   }
+  n*=60000.00;
+  n=round(n);
+  mm=(int)fmod(n,1000);
+  n/=1000;
+  n=floor(n);
+  m=(int)fmod(n, 60);
+  n/=60;
+  n=floor(n);
   d=(int)floor(n);
-  n-=floor(n);
-  n*=60.00;
-  m=(int)floor(n);
-  n-=floor(n);
-  n*=1000.00;
-  mm=(int)round(n);
   sprintf(str+1, "%02i %02i.%03i", d, m, mm);
   return str;
 }
 
-char* edmm_str(char* str, float e)
+char* edmm_str(char* str, double e)
 { /* 
-  ** float e naar Eddd mm.mmm string
+  ** double e naar Eddd mm.mmm string
   ** str is minstens 12 lang
   */
   int d;
@@ -229,20 +230,22 @@ char* edmm_str(char* str, float e)
     str[0]='W';
     e=-e;
   }
+  e*=60000.00;
+  e=round(e);
+  mm=(int)fmod(e,1000);
+  e/=1000;
+  e=floor(e);
+  m=(int)fmod(e, 60);
+  e/=60;
+  e=floor(e);
   d=(int)floor(e);
-  e-=floor(e);
-  e*=60.00;
-  m=(int)floor(e);
-  e-=floor(e);
-  e*=1000.00;
-  mm=(int)round(e);
   sprintf(str+1, "%03i %02i.%03i", d, m, mm);
   return str;
 }
 
-char* dmm_str(char* str, float n, float e)
+char* dmm_str(char* str, double n, double e)
 { /* 
-  ** float n, e naar Ndd mm.mmm Eddd mm.mmm string
+  ** double n, e naar Ndd mm.mmm Eddd mm.mmm string
   ** str is minstens 23 lang
   */
 	ndmm_str(str, n);
@@ -251,9 +254,9 @@ char* dmm_str(char* str, float n, float e)
   return str;
 }
 
-char* ndms_str(char* str, float n)
+char* ndms_str(char* str, double n)
 { /* 
-  ** float n naar Ndd mm'ss.ss" string
+  ** double n naar Ndd mm'ss.ss" string
   ** str is minstens 14 lang
   */
   int d;
@@ -269,23 +272,24 @@ char* ndms_str(char* str, float n)
     str[0]='S';
     n=-n;
   }
+  n*=360000.00;
+  n=round(n);
+  ds=fmod(n,100);
+  n/=100;
+  n=floor(n);
+  s=fmod(n,60);
+  n/=60;
+  n=floor(n);
+  m=fmod(n,60);
+  n/=60;
   d=(int)floor(n);
-  n-=floor(n);
-  n*=60.00;
-  m=(int)floor(n);
-  n-=floor(n);
-  n*=60.00;
-  s=(int)floor(n);
-  n-=floor(n);
-  n*=100;
-  ds=(int)round(n);
   sprintf(str+1, "%02i %02i'%02i.%02i\"", d, m, s, ds);
   return str;
 }
 
-char* edms_str(char* str, float e)
+char* edms_str(char* str, double e)
 { /* 
-  ** float e naar Eddd mm'ss.ss" string
+  ** double e naar Eddd mm'ss.ss" string
   ** str is minstens 15 lang
   */
   int d;
@@ -301,23 +305,24 @@ char* edms_str(char* str, float e)
     str[0]='W';
     e=-e;
   }
+  e*=360000.00;
+  e=round(e);
+  ds=fmod(e,100);
+  e/=100;
+  e=floor(e);
+  s=fmod(e,60);
+  e/=60;
+  e=floor(e);
+  m=fmod(e,60);
+  e/=60;
   d=(int)floor(e);
-  e-=floor(e);
-  e*=60.00;
-  m=(int)floor(e);
-  e-=floor(e);
-  e*=60.00;
-  s=(int)floor(e);
-  e-=floor(e);
-  e*=100;
-  ds=(int)round(e);
   sprintf(str+1, "%03i %02i'%02i.%02i\"", d, m, s, ds);
   return str;
 }
 
-char* dms_str(char* str, float n, float e)
+char* dms_str(char* str, double n, double e)
 { /* 
-  ** float n, e naar Ndd mm'ss.ss" Eddd mm'ss.ss" string
+  ** double n, e naar Ndd mm'ss.ss" Eddd mm'ss.ss" string
   ** str is minstens 29 lang
   */
 	ndms_str(str, n);
@@ -326,29 +331,27 @@ char* dms_str(char* str, float n, float e)
   return str;
 }
 
-char* xxx_str(char* str, float x)
+char* xxx_str(char* str, double x)
 { /*
 	** x naar X:xxxxxxm
 	** str is minstens 10 lang
 	*/
-	
 	sprintf(str, "X:%06.0fm", round(x));
 	return str;
 }
 
-char* yyy_str(char* str, float y)
+char* yyy_str(char* str, double y)
 { /*
 	** y naar Y:yyyyyym
 	** str is minstens 10 lang
 	*/
-	
 	sprintf(str, "Y:%06.0fm", round(y));
 	return str;
 }
 
-char* xy_str(char* str, float x, float y)
+char* xy_str(char* str, double x, double y)
 { /*
-	** x, y naar X=xxxxxx m Y=yyyyyy m
+	** x, y naar X:xxxxxxm Y:yyyyyym
 	** str is minstens 20 lang
   */
   xxx_str(str, x);
@@ -357,94 +360,37 @@ char* xy_str(char* str, float x, float y)
   return str;
 }
 
-float pairs[]={
-  141000.00, 629000.00,
-  100000.00, 600000.00,
-   80000.00, 500000.00,
-   -7000.00, 392000.00,
-       0.00, 392000.00,
-   -7000.00, 336000.00,
-       0.00, 336000.00,
-  101000.00, 336000.00,
-  161000.00, 289000.00,
-  161000.00, 289000.00,
-  219000.00, 289000.00,
-  219000.00, 290000.00,
-  300000.00, 451000.00,
-  289999.00, 451000.00,
-  300000.00, 614000.00,
-  289999.00, 614000.00,
-  259000.00, 629000.00,
-  289985.00, 628000.00,
-  289986.00, 628000.00,
-  289987.00, 628000.00,
-  289988.00, 628000.00,
-  289989.00, 628000.00,
-  289990.00, 628000.00,
-  289991.00, 628000.00,
-  289992.00, 628000.00,
-  289993.00, 628000.00,
-  289994.00, 628000.00,
-  289995.00, 628000.00,
-  289996.00, 628000.00,
-  289997.00, 628000.00,
-  289998.00, 628000.00,
-  289999.00, 628000.00,
-  289999.00, 627999.00,
-  289999.00, 627998.00,
-  289999.00, 627997.00,
-  289999.00, 627996.00,
-  289999.00, 627995.00,
-  289999.00, 627994.00,
-  289999.00, 627993.00,
-  289999.00, 627992.00,
-  289999.00, 627991.00,
-  289999.00, 627990.00,
-  289999.00, 627989.00,
-  289999.00, 627988.00,
-  289999.00, 627987.00,
-  289999.00, 627986.00,
-  289999.00, 627985.00,
-  289999.00, 627984.00,
-   -7000.00, 629000.00,
-   -7000.00, 289000.00,
-  300000.00, 289000.00,
-  300000.00, 629000.00};
-
-int main(void)
+FILE* fopen_kml(char* filename)
 {
-	int i;
-	float *p=pairs;
-	float n;
-	float e;
-	float x;
-	float y;
-	char string[128];
-	char string2[128];
 	FILE* f;
-	f=fopen("pairs.txt","w");
-	if(f==NULL)
-	{
-		printf("File open error!\n");
-		return -1;
-	}
-	n=52.123456789;
-	e=6.23456789;
-	ne2xy(&x, &y, n, e);
-	printf("%s\n", ddd_str(string, n, e));
-	printf("%s\n", ddd_str(string, -n, -e));
-	printf("%s\n", dmm_str(string, n, e));
-	printf("%s\n", dmm_str(string, -n, -e));
-	printf("%s\n", dms_str(string, n, e));
-	printf("%s\n", dms_str(string, -n, -e));
-	printf("%s\n", xy_str(string, x, y));
-	for(i=0; i<52; i++)
-	{
-		x=*p++;
-		y=*p++;
-		xy2ne(&n, &e, x, y);
-		fprintf(f, "%s = %s\n", xy_str(string, x, y), dmm_str(string2, n, e));
-	}
-	fclose(f);
-	return 0;
+	f=fopen(filename,"w");
+  if(f==NULL)
+  {
+  	return f;
+  }
+  fprintf(f, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+             "<kml xmlns=\"http://earth.google.com/kml/2.2\">\n"
+             "  <Document>\n");
+  return f;
 }
+
+int fprint_placemark(FILE* f, double n, double e, char* name, char* description)
+{
+  return fprintf(f, "    <Placemark>\n"
+                    "      <name>%s</name>\n"
+                    "      <description>%s</description>\n"
+                    "      <Point>\n"
+                    "        <coordinates>\n"
+                    "          %f,%f\n"
+                    "        </coordinates>\n"
+                    "      </Point>\n"
+                    "    </Placemark>\n", name, description, e, n);
+}
+
+int fclose_kml(FILE* f)
+{
+  fprintf(f, "</Document>\n</kml>\n");
+	return fclose(f);
+}
+
+
